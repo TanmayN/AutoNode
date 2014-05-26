@@ -28,9 +28,25 @@
 		return true;
 	}
 
+	function delServer($mysql, $host, $port) {
+		$exists = $mysql->prepare("SELECT * FROM Servers WHERE Host='?' AND Port=?");
+		$exists->bind_param('si', $host, $port);
+		$exists->execute();
+		$exists = $exists->num_rows > 0;
+
+		if ($exists) {
+			$stmt = $mysql->prepare("DELETE FROM Servers WHERE Host=? AND Port=?");
+			$stmt->bind_param('si', $host, $port);
+			$stmt->execute();
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	function __destroy() {
 		$mysql->close();
 	}
 
-	
+
 ?>
