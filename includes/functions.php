@@ -31,4 +31,6 @@
 	function __destroy() {
 		$mysql->close();
 	}
+
+	
 ?>
