@@ -44,6 +44,40 @@
 		}
 	}
 
+	function serverStats($mysql) {
+		$servers = $mysql->query("SELECT * FROM Servers");
+		$servers = $servers->fetch_all();
+
+		foreach ($servers as $server) {
+			$host = $servers[$server]['Host'];
+			$port = $servers[$server]['Port'];
+			$username = $servers[$server]['username'];
+			$password = $servers[$server]['password'];
+
+			$con = ssh2_connect($host, $port) or return false;
+			ssh2_auth_password($con, $username, $password) or return false;
+
+			$output[$server] = sshCommand("~/serverStats.sh");
+		}
+
+		return $output;
+	}
+
+	function sshCommand($con, $command) {
+		$shell = ssh2_shell($con, 'vt102', null, 80, 40, SSH2_TERM_UNIT_CHARS);
+		stream_set_blocking($shell, true);
+		fwrite($command);
+		sleep(1);
+
+		$data = "";
+        while ($buf = fread($shell, 4096)) {
+            $data .= $buf;
+        }
+        fclose($shell);
+
+        return $data;
+	}
+
 	function __destroy() {
 		$mysql->close();
 	}
